@@ -65,15 +65,15 @@
   .total-change { font-family: 'JetBrains Mono',monospace; font-size: 20px; font-weight: 600; line-height: 1; }
   .total-change-label { font-size: 12px; color: var(--text2); margin-top: 5px; }
 
-  .col-header { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1.2fr; gap: 12px; padding: 0 20px; margin-bottom: 6px; }
+  .col-header { display: grid; grid-template-columns: 1.8fr 1.1fr 0.9fr 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 6px; }
   .col-header span { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; }
-  .col-header span:nth-child(2), .col-header span:nth-child(3) { text-align: center; }
-  .col-header span:nth-child(4) { text-align: right; }
+  .col-header span:nth-child(2), .col-header span:nth-child(3), .col-header span:nth-child(4) { text-align: center; }
+  .col-header span:nth-child(5) { text-align: right; }
 
   .grid { display: grid; gap: 8px; }
   .card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px 20px; display: grid; grid-template-columns: 2fr 1.2fr 1fr 1.2fr;
+    padding: 16px 20px; display: grid; grid-template-columns: 1.8fr 1.1fr 0.9fr 1fr 1fr;
     align-items: center; gap: 12px;
     transition: border-color .15s, background .15s; animation: fadeIn .35s ease both;
   }
@@ -97,9 +97,15 @@
   .card-change.down { color: var(--down); background: var(--down-bg); }
   .card-change.flat { color: var(--text2); background: var(--surface2); }
 
-  .card-worth-block { text-align: right; }
+  .card-worth-block { text-align: center; }
   .card-worth { font-family: 'JetBrains Mono',monospace; font-size: 16px; font-weight: 600; color: var(--text); }
   .card-worth-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .card-pl-block { text-align: right; }
+  .card-pl { font-family: 'JetBrains Mono',monospace; font-size: 15px; font-weight: 600; }
+  .card-pl.up   { color: var(--up); }
+  .card-pl.down { color: var(--down); }
+  .card-pl-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
   .skeleton {
     background: linear-gradient(90deg,#1e1e2e 25%,#252535 50%,#1e1e2e 75%);
@@ -112,6 +118,7 @@
 
   @media(max-width:580px) {
     .card { grid-template-columns: 1.5fr 1fr 1fr; }
+    .card-pl-block { display: none; }
     .card-price-block { display: none; }
     .col-header { grid-template-columns: 1.5fr 1fr 1fr; }
     .col-header span:nth-child(2) { display: none; }
@@ -146,7 +153,7 @@
   </div>
 
   <div class="col-header">
-    <span>Asset</span><span>Price</span><span>Change</span><span>Value</span>
+    <span>Asset</span><span>Price</span><span>Today</span><span>Value</span><span>P&amp;L</span>
   </div>
   <div class="grid" id="grid"></div>
   <div class="note" id="note">Prices fetched live via Yahoo Finance. Values shown in each asset's native currency; total is approximate in EUR. Auto-refreshes every 60s.</div>
@@ -158,45 +165,45 @@
 const HOLDINGS = [
   {
     ticker: 'VWCE', shares: 4.08, name: 'Vanguard FTSE All-World',
-    // Known ~€151. VWCE.DE is the main Xetra listing.
     yahooTickers: ['VWCE.DE'],
     priceRange: [80, 300], displayCurrency: 'EUR',
+    buyPrice: 147.02,
   },
   {
     ticker: 'NVDA', shares: 1.67, name: 'NVIDIA Corp',
-    // Known ~$198. Plain NVDA is NYSE in USD.
     yahooTickers: ['NVDA'],
     priceRange: [50, 2000], displayCurrency: 'USD',
+    buyPrice: (177.20 * 150 + 182.01 * 150) / 300, // weighted avg of two purchases
   },
   {
     ticker: 'EUNA', shares: 30.46, name: 'iShares Core Global Agg Bond',
-    // Known ~€4.93. EUNA.DE is Xetra, price ~€4.93. EUNA.AS is a different ETF at ~€49.
     yahooTickers: ['EUNA.DE'],
     priceRange: [3, 10], displayCurrency: 'EUR',
+    buyPrice: 4.92,
   },
   {
     ticker: '10AF', shares: 1.13, name: 'Amundi Core MSCI Emerging Mkts',
-    // Known ~€91.88. Traded on Munich (MU) and Brussels (BE).
     yahooTickers: ['10AF.DU'],
     priceRange: [60, 150], displayCurrency: 'EUR',
+    buyPrice: 87.90,
   },
   {
     ticker: 'EXSA', shares: 1.68, name: 'iShares STOXX Europe 600',
-    // Known ~€61.23. EXSA.DE is Xetra.
     yahooTickers: ['EXSA.DE'],
     priceRange: [30, 120], displayCurrency: 'EUR',
+    buyPrice: 59.24,
   },
   {
     ticker: 'OM3E', shares: 6.98, name: 'iShares Nasdaq US Biotech',
-    // Known ~€7.37. Traded on Munich as OM3E.MU.
     yahooTickers: ['OM3E.DU'],
     priceRange: [3, 20], displayCurrency: 'EUR',
+    buyPrice: 7.16,
   },
   {
     ticker: 'TSM', shares: 0.56, name: 'Taiwan Semiconductor',
-    // Known ~$363. Plain TSM is NYSE ADR in USD.
     yahooTickers: ['TSM'],
     priceRange: [100, 800], displayCurrency: 'USD',
+    buyPrice: (340 * 100 + 364 * 100) / 200, // weighted avg of two purchases
   },
 ];
 
@@ -288,6 +295,10 @@ function buildCards() {
       <div class="card-worth-block">
         <div class="card-worth skeleton" id="worth-${h.ticker}" style="width:84px;height:19px;">&nbsp;</div>
         <div class="card-worth-label">position</div>
+      </div>
+      <div class="card-pl-block">
+        <div class="card-pl skeleton" id="pl-${h.ticker}" style="width:72px;height:17px;">&nbsp;</div>
+        <div class="card-pl-label">vs buy</div>
       </div>`;
     grid.appendChild(el);
   });
@@ -308,16 +319,20 @@ async function fetchAll() {
   const settled = await Promise.allSettled(HOLDINGS.map(fetchQuote));
 
   settled.forEach((res, i) => {
-    const h  = HOLDINGS[i];
-    const pe = document.getElementById('price-'  + h.ticker);
-    const ce = document.getElementById('change-' + h.ticker);
-    const we = document.getElementById('worth-'  + h.ticker);
+    const h   = HOLDINGS[i];
+    const pe  = document.getElementById('price-'  + h.ticker);
+    const ce  = document.getElementById('change-' + h.ticker);
+    const we  = document.getElementById('worth-'  + h.ticker);
+    const ple = document.getElementById('pl-'     + h.ticker);
 
     if (res.status === 'fulfilled') {
       const { price, prev, currency } = res.value;
       const worth     = price * h.shares;
       const prevWorth = prev  * h.shares;
       const pct = ((price - prev) / prev) * 100;
+
+      // P&L vs buy price
+      const plPct = ((price - h.buyPrice) / h.buyPrice) * 100;
 
       // Convert to EUR for total
       const toEur = currency === 'USD' ? eurPerUsd : 1;
@@ -329,10 +344,13 @@ async function fetchAll() {
       ce.className = 'card-change ' + (pct > 0.005 ? 'up' : pct < -0.005 ? 'down' : 'flat');
       ce.style = ''; ce.textContent = fmtPct(pct);
       we.className = 'card-worth'; we.style = ''; we.textContent = fmtC(worth, currency);
+      ple.className = 'card-pl ' + (plPct >= 0 ? 'up' : 'down');
+      ple.style = ''; ple.textContent = fmtPct(plPct);
     } else {
       pe.className = 'card-price'; pe.style = 'color:var(--down);font-size:12px;'; pe.textContent = 'N/A';
       ce.className = 'card-change flat'; ce.style = ''; ce.textContent = '—';
       we.className = 'card-worth'; we.style = 'color:var(--text2)'; we.textContent = '—';
+      ple.className = 'card-pl'; ple.style = 'color:var(--text2)'; ple.textContent = '—';
       failed.push(h.ticker);
     }
   });
