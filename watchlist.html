@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Watchlist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00ff9d;
+    --accent-dim: rgba(0,255,157,0.08);
+    --accent-mid: rgba(0,255,157,0.2);
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --up: #00ff9d;
+    --down: #ff4d6d;
+    --up-bg: rgba(0,255,157,0.07);
+    --down-bg: rgba(255,77,109,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px 60px;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,255,157,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+  header { margin-bottom: 48px; }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 44px);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  h1 span { color: var(--accent); }
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .dot { width:7px; height:7px; background:var(--accent); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
+  .last-update { font-size:11px; color:var(--muted); margin-top:8px; }
+  .total-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .total-card::after {
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  }
+  .total-label { font-size:11px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:6px; }
+  .total-value { font-family:'Syne',sans-serif; font-size:clamp(32px,6vw,52px); font-weight:800; color:var(--accent); letter-spacing:-1px; }
+  .total-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+  .total-change { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; text-align:right; }
+  .grid { display:grid; gap:12px; }
+  .card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 24px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr;
+    align-items:center;
+    gap:12px;
+    transition:border-color .2s,background .2s;
+    animation:fadeIn .4s ease both;
+  }
+  .card:hover { border-color:rgba(0,255,157,.2); background:#13131c; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .card-ticker { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
+  .card-shares { font-size:11px; color:var(--muted); margin-top:3px; }
+  .card-price-block { text-align:center; }
+  .card-price { font-size:15px; font-weight:500; }
+  .card-price-label { font-size:10px; color:var(--muted); margin-top:2px; letter-spacing:.08em; }
+  .card-change { text-align:center; font-size:13px; font-weight:500; padding:4px 10px; border-radius:6px; white-space:nowrap; }
+  .card-change.up   { color:var(--up);   background:var(--up-bg); }
+  .card-change.down { color:var(--down); background:var(--down-bg); }
+  .card-change.flat { color:var(--muted); }
+  .card-worth { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; text-align:right; }
+  .card-worth-label { font-size:10px; color:var(--muted); margin-top:2px; text-align:right; letter-spacing:.08em; }
+  .skeleton { background:#1a1a28; border-radius:4px; animation:shimmer 1.4s infinite; display:inline-block; }
+  @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
+  .col-header { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; padding:0 24px; margin-bottom:6px; }
+  .col-header span { font-size:10px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+  .col-header span:nth-child(2) { text-align:center; }
+  .col-header span:nth-child(3) { text-align:center; }
+  .col-header span:nth-child(4) { text-align:right; }
+  .header-actions { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+  .refresh-btn {
+    background:var(--accent-dim);
+    border:1px solid var(--accent-mid);
+    color:var(--accent);
+    border-radius:8px;
+    padding:8px 16px;
+    font-family:'DM Mono',monospace;
+    font-size:12px;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  .refresh-btn:hover { background:rgba(0,255,157,.15); }
+  .note { font-size:11px; color:var(--muted); margin-top:28px; line-height:1.8; border-top:1px solid var(--border); padding-top:20px; }
+  @media(max-width:600px){
+    .card { grid-template-columns:1fr 1fr; }
+    .card-price-block { display:none; }
+    .col-header span:nth-child(2) { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-top">
+      <h1>PORT<span>FOLIO</span></h1>
+      <div class="header-actions">
+        <div class="status-pill"><span class="dot"></span> LIVE PRICES</div>
+        <button class="refresh-btn" onclick="fetchAll()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="last-update" id="lastUpdate">Fetching prices…</div>
+  </header>
+
+  <div class="total-card">
+    <div>
+      <div class="total-label">Total Portfolio Value</div>
+      <div class="total-value" id="totalValue">—</div>
+      <div class="total-sub" id="totalSub">Loading all positions…</div>
+    </div>
+    <div>
+      <div class="total-label" style="text-align:right">Today's Change</div>
+      <div class="total-change" id="totalChange">—</div>
+    </div>
+  </div>
+
+  <div class="col-header">
+    <span>Asset</span><span>Price / share</span><span>Change</span><span>Value</span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="note" id="note">Prices fetched live via Yahoo Finance. Auto-refreshes every 60 seconds.</div>
+</div>
+
+<script>
+const HOLDINGS = [
+  { ticker:'VWCE', shares:4.08,  yahoo:'VWCE.DE', name:'Vanguard FTSE All-World' },
+  { ticker:'NVDA', shares:1.67,  yahoo:'NVDA',    name:'NVIDIA Corp' },
+  { ticker:'EUNA', shares:30.46, yahoo:'EUNA.AS', name:'iShares EUR Govt Bond' },
+  { ticker:'10AF', shares:1.13,  yahoo:'10AF.PA', name:'10AF ETF' },
+  { ticker:'EXSA', shares:1.68,  yahoo:'EXSA.DE', name:'iShares STOXX Europe 600' },
+  { ticker:'OM3E', shares:6.98,  yahoo:'OM3E.DE', name:'Amundi MSCI EM' },
+  { ticker:'TSM',  shares:0.56,  yahoo:'TSM',     name:'Taiwan Semiconductor' },
+];
+
+function yahooUrl(t) {
+  return `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(t)}?interval=1d&range=2d`;
+}
+
+// Ordered list of fetch strategies
+async function fetchQuote(yahooTicker) {
+  const target = yahooUrl(yahooTicker);
+
+  const strategies = [
+    // 1. allorigins
+    () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`),
+    // 2. corsproxy.io
+    () => fetch(`https://corsproxy.io/?${encodeURIComponent(target)}`),
+    // 3. thingproxy
+    () => fetch(`https://thingproxy.freeboard.io/fetch/${target}`),
+    // 4. direct (works in some contexts)
+    () => fetch(target, { mode: 'cors' }),
+  ];
+
+  for (const attempt of strategies) {
+    try {
+      const res = await attempt();
+      if (!res.ok) continue;
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (!result) continue;
+      const meta = result.meta;
+      const price = meta.regularMarketPrice;
+      const prev  = meta.chartPreviousClose ?? meta.previousClose ?? price;
+      const currency = meta.currency || 'USD';
+      if (!price) continue;
+      return { price, prev, currency };
+    } catch (_) { /* try next */ }
+  }
+  throw new Error('All strategies failed for ' + yahooTicker);
+}
+
+const fmtC = (n, cur) =>
+  new Intl.NumberFormat('nl-NL', {
+    style:'currency', currency: cur || 'EUR',
+    minimumFractionDigits:2, maximumFractionDigits:2
+  }).format(n);
+
+const fmtPct = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+
+function buildCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  HOLDINGS.forEach((h, i) => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.animationDelay = (i * 60) + 'ms';
+    el.innerHTML = `
+      <div>
+        <div class="card-ticker">${h.ticker}</div>
+        <div class="card-shares">${h.shares} shares · ${h.name}</div>
+      </div>
+      <div class="card-price-block">
+        <div class="card-price skeleton" id="price-${h.ticker}" style="width:80px;height:18px;">&nbsp;</div>
+        <div class="card-price-label">PER SHARE</div>
+      </div>
+      <div class="card-change flat" id="change-${h.ticker}">—</div>
+      <div>
+        <div class="card-worth skeleton" id="worth-${h.ticker}" style="width:90px;height:22px;">&nbsp;</div>
+        <div class="card-worth-label">POSITION VALUE</div>
+      </div>`;
+    grid.appendChild(el);
+  });
+}
+
+async function fetchAll() {
+  document.getElementById('lastUpdate').textContent = 'Refreshing prices…';
+  let totalVal = 0, totalPrev = 0, loaded = 0, failed = [];
+
+  const settled = await Promise.allSettled(
+    HOLDINGS.map(h => fetchQuote(h.yahoo).then(r => ({ ...r, h })))
+  );
+
+  settled.forEach((res, i) => {
+    const h = HOLDINGS[i];
+    const pe = document.getElementById('price-'  + h.ticker);
+    const ce = document.getElementById('change-' + h.ticker);
+    const we = document.getElementById('worth-'  + h.ticker);
+
+    if (res.status === 'fulfilled') {
+      const { price, prev, currency } = res.value;
+      const worth = price * h.shares;
+      const pct   = ((price - prev) / prev) * 100;
+
+      totalVal  += worth;
+      totalPrev += prev * h.shares;
+      loaded++;
+
+      pe.className = 'card-price'; pe.style = ''; pe.textContent = fmtC(price, currency);
+      ce.textContent = fmtPct(pct);
+      ce.className = 'card-change ' + (pct > 0.005 ? 'up' : pct < -0.005 ? 'down' : 'flat');
+      we.className = 'card-worth'; we.style = ''; we.textContent = fmtC(worth, currency);
+    } else {
+      pe.className = 'card-price'; pe.style = 'color:var(--down);font-size:11px;'; pe.textContent = 'unavailable';
+      ce.textContent = '—'; ce.className = 'card-change flat';
+      we.className = 'card-worth'; we.style = ''; we.textContent = '—';
+      failed.push(h.ticker);
+    }
+  });
+
+  if (loaded > 0) {
+    const pct = ((totalVal - totalPrev) / totalPrev) * 100;
+    const abs = totalVal - totalPrev;
+    document.getElementById('totalValue').textContent = '≈ ' + fmtC(totalVal, 'EUR');
+    document.getElementById('totalSub').textContent =
+      `${loaded}/${HOLDINGS.length} positions loaded` + (failed.length ? ` · failed: ${failed.join(', ')}` : '');
+    const tc = document.getElementById('totalChange');
+    tc.textContent = `${fmtPct(pct)}  (${abs >= 0 ? '+' : ''}${fmtC(abs, 'EUR')})`;
+    tc.style.color = pct >= 0 ? 'var(--up)' : 'var(--down)';
+  } else {
+    document.getElementById('totalValue').textContent = '—';
+    document.getElementById('totalSub').textContent = 'Could not load any prices.';
+    document.getElementById('note').textContent =
+      '⚠ All price fetches failed. This file must be served over HTTPS or via a local server ' +
+      '(not opened as a plain file:// URL) for the CORS proxies to work. ' +
+      'Try uploading it to a hosting service, or open it with VS Code Live Server.';
+  }
+
+  const now = new Date();
+  document.getElementById('lastUpdate').textContent =
+    `Last updated: ${now.toLocaleTimeString('nl-NL')} — auto-refreshes every 60s`;
+}
+
+buildCards();
+fetchAll();
+setInterval(fetchAll, 60_000);
+</script>
+</body>
+</html>
