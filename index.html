@@ -4,241 +4,325 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio Watchlist</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --border: #1e1e2e;
-    --accent: #00ff9d;
-    --accent-dim: rgba(0,255,157,0.08);
-    --accent-mid: rgba(0,255,157,0.2);
-    --text: #e8e8f0;
-    --muted: #5a5a7a;
-    --up: #00ff9d;
-    --down: #ff4d6d;
-    --up-bg: rgba(0,255,157,0.07);
-    --down-bg: rgba(255,77,109,0.07);
+    --bg: #0d0d14;
+    --surface: #16161f;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #00e87a;
+    --accent-dim: rgba(0,232,122,0.1);
+    --accent-mid: rgba(0,232,122,0.25);
+    --text: #f0f0f8;
+    --text2: #a0a0b8;
+    --up: #00e87a;
+    --down: #ff5070;
+    --up-bg: rgba(0,232,122,0.1);
+    --down-bg: rgba(255,80,112,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    padding: 40px 20px 60px;
-    position: relative;
-    overflow-x: hidden;
+    padding: 36px 20px 60px;
   }
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; left: 50%;
-    transform: translateX(-50%);
-    width: 700px; height: 400px;
-    background: radial-gradient(ellipse, rgba(0,255,157,0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
-  header { margin-bottom: 48px; }
-  .header-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 8px;
-  }
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(28px, 5vw, 44px);
-    letter-spacing: -1px;
-    line-height: 1;
-  }
-  h1 span { color: var(--accent); }
-  .status-pill {
+  .container { max-width: 860px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .header {
     display: flex;
     align-items: center;
-    gap: 7px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .header-left .sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
     background: var(--accent-dim);
     border: 1px solid var(--accent-mid);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 11px;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--accent);
-    letter-spacing: 0.08em;
-    white-space: nowrap;
+    letter-spacing: 0.04em;
   }
-  .dot { width:7px; height:7px; background:var(--accent); border-radius:50%; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
-  .last-update { font-size:11px; color:var(--muted); margin-top:8px; }
+  .dot { width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .refresh-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .refresh-btn:hover { color: var(--text); border-color: #444; }
+
+  /* ── Total card ── */
   .total-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px 32px;
-    margin-bottom: 28px;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 16px;
-    position: relative;
-    overflow: hidden;
   }
-  .total-card::after {
-    content:'';
-    position:absolute;
-    top:0;left:0;right:0;
-    height:1px;
-    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  .total-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
   }
-  .total-label { font-size:11px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:6px; }
-  .total-value { font-family:'Syne',sans-serif; font-size:clamp(32px,6vw,52px); font-weight:800; color:var(--accent); letter-spacing:-1px; }
-  .total-sub { font-size:12px; color:var(--muted); margin-top:4px; }
-  .total-change { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; text-align:right; }
-  .grid { display:grid; gap:12px; }
+  .total-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .total-status {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+  .total-change-block { text-align: right; }
+  .total-change {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .total-change-label { font-size: 12px; color: var(--text2); margin-top: 5px; }
+
+  /* ── Column headers ── */
+  .col-header {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1.2fr;
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 6px;
+  }
+  .col-header span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .col-header span:nth-child(2),
+  .col-header span:nth-child(3) { text-align: center; }
+  .col-header span:nth-child(4) { text-align: right; }
+
+  /* ── Cards ── */
+  .grid { display: grid; gap: 8px; }
   .card {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:20px 24px;
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr 1fr;
-    align-items:center;
-    gap:12px;
-    transition:border-color .2s,background .2s;
-    animation:fadeIn .4s ease both;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1.2fr;
+    align-items: center;
+    gap: 12px;
+    transition: border-color .15s, background .15s;
+    animation: fadeIn .35s ease both;
   }
-  .card:hover { border-color:rgba(0,255,157,.2); background:#13131c; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .card-ticker { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
-  .card-shares { font-size:11px; color:var(--muted); margin-top:3px; }
-  .card-price-block { text-align:center; }
-  .card-price { font-size:15px; font-weight:500; }
-  .card-price-label { font-size:10px; color:var(--muted); margin-top:2px; letter-spacing:.08em; }
-  .card-change { text-align:center; font-size:13px; font-weight:500; padding:4px 10px; border-radius:6px; white-space:nowrap; }
-  .card-change.up   { color:var(--up);   background:var(--up-bg); }
-  .card-change.down { color:var(--down); background:var(--down-bg); }
-  .card-change.flat { color:var(--muted); }
-  .card-worth { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; text-align:right; }
-  .card-worth-label { font-size:10px; color:var(--muted); margin-top:2px; text-align:right; letter-spacing:.08em; }
-  .skeleton { background:#1a1a28; border-radius:4px; animation:shimmer 1.4s infinite; display:inline-block; }
-  @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
-  .col-header { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; padding:0 24px; margin-bottom:6px; }
-  .col-header span { font-size:10px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
-  .col-header span:nth-child(2) { text-align:center; }
-  .col-header span:nth-child(3) { text-align:center; }
-  .col-header span:nth-child(4) { text-align:right; }
-  .header-actions { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
-  .refresh-btn {
-    background:var(--accent-dim);
-    border:1px solid var(--accent-mid);
-    color:var(--accent);
-    border-radius:8px;
-    padding:8px 16px;
-    font-family:'DM Mono',monospace;
-    font-size:12px;
-    cursor:pointer;
-    transition:background .2s;
+  .card:hover { border-color: #383850; background: #18181f; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .card-ticker {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.2px;
   }
-  .refresh-btn:hover { background:rgba(0,255,157,.15); }
-  .note { font-size:11px; color:var(--muted); margin-top:28px; line-height:1.8; border-top:1px solid var(--border); padding-top:20px; }
-  @media(max-width:600px){
-    .card { grid-template-columns:1fr 1fr; }
-    .card-price-block { display:none; }
-    .col-header span:nth-child(2) { display:none; }
+  .card-name {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .card-shares-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 1px;
+  }
+
+  .card-price-block { text-align: center; }
+  .card-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .card-price-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .card-change {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    justify-self: center;
+  }
+  .card-change.up   { color: var(--up);   background: var(--up-bg); }
+  .card-change.down { color: var(--down); background: var(--down-bg); }
+  .card-change.flat { color: var(--text2); background: var(--surface2); }
+
+  .card-worth-block { text-align: right; }
+  .card-worth {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .card-worth-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* Skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #1e1e2e 25%, #252535 50%, #1e1e2e 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    display: inline-block;
+    animation: skshimmer 1.5s infinite;
+  }
+  @keyframes skshimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .note {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 24px;
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+
+  @media(max-width:580px) {
+    .card { grid-template-columns: 1.5fr 1fr 1fr; }
+    .card-price-block { display: none; }
+    .col-header { grid-template-columns: 1.5fr 1fr 1fr; }
+    .col-header span:nth-child(2) { display: none; }
+    .total-value { font-size: 30px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <div class="header-top">
-      <h1>PORT<span>FOLIO</span></h1>
-      <div class="header-actions">
-        <div class="status-pill"><span class="dot"></span> LIVE PRICES</div>
-        <button class="refresh-btn" onclick="fetchAll()">↻ Refresh</button>
-      </div>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>My Portfolio</h1>
+      <div class="sub" id="lastUpdate">Fetching prices…</div>
     </div>
-    <div class="last-update" id="lastUpdate">Fetching prices…</div>
-  </header>
+    <div class="header-right">
+      <div class="live-badge"><span class="dot"></span> LIVE</div>
+      <button class="refresh-btn" onclick="fetchAll()">↻ Refresh</button>
+    </div>
+  </div>
 
   <div class="total-card">
     <div>
-      <div class="total-label">Total Portfolio Value</div>
+      <div class="total-label">Total Value</div>
       <div class="total-value" id="totalValue">—</div>
-      <div class="total-sub" id="totalSub">Loading all positions…</div>
+      <div class="total-status" id="totalSub">Loading positions…</div>
     </div>
-    <div>
-      <div class="total-label" style="text-align:right">Today's Change</div>
+    <div class="total-change-block">
+      <div class="total-label" style="text-align:right">Today</div>
       <div class="total-change" id="totalChange">—</div>
+      <div class="total-change-label" id="totalChangeAbs"></div>
     </div>
   </div>
 
   <div class="col-header">
-    <span>Asset</span><span>Price / share</span><span>Change</span><span>Value</span>
+    <span>Asset</span>
+    <span>Price</span>
+    <span>Change</span>
+    <span>Value</span>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="note" id="note">Prices fetched live via Yahoo Finance. Auto-refreshes every 60 seconds.</div>
-</div>
+  <div class="note" id="note">Prices fetched live via Yahoo Finance. Auto-refreshes every 60s.</div>
 
+</div>
 <script>
 const HOLDINGS = [
-  { ticker:'VWCE', shares:4.08,  yahoo:'VWCE.DE', name:'Vanguard FTSE All-World' },
-  { ticker:'NVDA', shares:1.67,  yahoo:'NVDA',    name:'NVIDIA Corp' },
-  { ticker:'EUNA', shares:30.46, yahoo:'EUNA.AS', name:'iShares EUR Govt Bond' },
-  { ticker:'10AF', shares:1.13,  yahoo:'10AF.PA', name:'10AF ETF' },
-  { ticker:'EXSA', shares:1.68,  yahoo:'EXSA.DE', name:'iShares STOXX Europe 600' },
-  { ticker:'OM3E', shares:6.98,  yahoo:'OM3E.DE', name:'Amundi MSCI EM' },
-  { ticker:'TSM',  shares:0.56,  yahoo:'TSM',     name:'Taiwan Semiconductor' },
+  { ticker:'VWCE', shares:4.08,  yahooTickers:['VWCE.DE','VWCE.AS'],          name:'Vanguard FTSE All-World' },
+  { ticker:'NVDA', shares:1.67,  yahooTickers:['NVDA'],                        name:'NVIDIA Corp' },
+  { ticker:'EUNA', shares:30.46, yahooTickers:['EUNA.DE','EUNA.F'],            name:'iShares Core Global Agg Bond' },
+  { ticker:'10AF', shares:1.13,  yahooTickers:['10AF.BE','10AF.PA','10AF.DE'], name:'Amundi MSCI EM Asia' },
+  { ticker:'EXSA', shares:1.68,  yahooTickers:['EXSA.DE','EXSA.AS'],           name:'iShares STOXX Europe 600' },
+  { ticker:'OM3E', shares:6.98,  yahooTickers:['OM3E.MU','OM3E.DU','OM3E.DE'],name:'iShares NASDAQ Biotech UCITS' },
+  { ticker:'TSM',  shares:0.56,  yahooTickers:['TSM'],                          name:'Taiwan Semiconductor' },
+];
+
+const PROXIES = [
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
+  u => u,
 ];
 
 function yahooUrl(t) {
   return `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(t)}?interval=1d&range=2d`;
 }
 
-// Ordered list of fetch strategies
-async function fetchQuote(yahooTicker) {
-  const target = yahooUrl(yahooTicker);
-
-  const strategies = [
-    // 1. allorigins
-    () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`),
-    // 2. corsproxy.io
-    () => fetch(`https://corsproxy.io/?${encodeURIComponent(target)}`),
-    // 3. thingproxy
-    () => fetch(`https://thingproxy.freeboard.io/fetch/${target}`),
-    // 4. direct (works in some contexts)
-    () => fetch(target, { mode: 'cors' }),
-  ];
-
-  for (const attempt of strategies) {
+async function tryFetch(url) {
+  for (const px of PROXIES) {
     try {
-      const res = await attempt();
+      const res = await fetch(px(url), { signal: AbortSignal.timeout(7000) });
       if (!res.ok) continue;
       const data = await res.json();
-      const result = data?.chart?.result?.[0];
-      if (!result) continue;
-      const meta = result.meta;
-      const price = meta.regularMarketPrice;
-      const prev  = meta.chartPreviousClose ?? meta.previousClose ?? price;
-      const currency = meta.currency || 'USD';
-      if (!price) continue;
-      return { price, prev, currency };
-    } catch (_) { /* try next */ }
+      const meta = data?.chart?.result?.[0]?.meta;
+      if (!meta?.regularMarketPrice) continue;
+      return {
+        price: meta.regularMarketPrice,
+        prev: meta.chartPreviousClose ?? meta.previousClose ?? meta.regularMarketPrice,
+        currency: meta.currency || 'EUR',
+      };
+    } catch (_) {}
   }
-  throw new Error('All strategies failed for ' + yahooTicker);
+  return null;
+}
+
+async function fetchQuote(h) {
+  for (const yt of h.yahooTickers) {
+    const r = await tryFetch(yahooUrl(yt));
+    if (r) return r;
+  }
+  throw new Error('failed: ' + h.ticker);
 }
 
 const fmtC = (n, cur) =>
-  new Intl.NumberFormat('nl-NL', {
-    style:'currency', currency: cur || 'EUR',
-    minimumFractionDigits:2, maximumFractionDigits:2
-  }).format(n);
-
+  new Intl.NumberFormat('nl-NL', { style:'currency', currency: cur||'EUR', minimumFractionDigits:2, maximumFractionDigits:2 }).format(n);
 const fmtPct = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 
 function buildCards() {
@@ -247,35 +331,34 @@ function buildCards() {
   HOLDINGS.forEach((h, i) => {
     const el = document.createElement('div');
     el.className = 'card';
-    el.style.animationDelay = (i * 60) + 'ms';
+    el.style.animationDelay = (i * 50) + 'ms';
     el.innerHTML = `
       <div>
         <div class="card-ticker">${h.ticker}</div>
-        <div class="card-shares">${h.shares} shares · ${h.name}</div>
+        <div class="card-name">${h.name}</div>
+        <div class="card-shares-label">${h.shares} shares</div>
       </div>
       <div class="card-price-block">
-        <div class="card-price skeleton" id="price-${h.ticker}" style="width:80px;height:18px;">&nbsp;</div>
-        <div class="card-price-label">PER SHARE</div>
+        <div class="card-price skeleton" id="price-${h.ticker}" style="width:76px;height:17px;">&nbsp;</div>
+        <div class="card-price-label">per share</div>
       </div>
-      <div class="card-change flat" id="change-${h.ticker}">—</div>
-      <div>
-        <div class="card-worth skeleton" id="worth-${h.ticker}" style="width:90px;height:22px;">&nbsp;</div>
-        <div class="card-worth-label">POSITION VALUE</div>
+      <div class="card-change flat skeleton" id="change-${h.ticker}" style="width:60px;height:24px;">&nbsp;</div>
+      <div class="card-worth-block">
+        <div class="card-worth skeleton" id="worth-${h.ticker}" style="width:84px;height:19px;">&nbsp;</div>
+        <div class="card-worth-label">position</div>
       </div>`;
     grid.appendChild(el);
   });
 }
 
 async function fetchAll() {
-  document.getElementById('lastUpdate').textContent = 'Refreshing prices…';
+  document.getElementById('lastUpdate').textContent = 'Refreshing…';
   let totalVal = 0, totalPrev = 0, loaded = 0, failed = [];
 
-  const settled = await Promise.allSettled(
-    HOLDINGS.map(h => fetchQuote(h.yahoo).then(r => ({ ...r, h })))
-  );
+  const settled = await Promise.allSettled(HOLDINGS.map(fetchQuote));
 
   settled.forEach((res, i) => {
-    const h = HOLDINGS[i];
+    const h  = HOLDINGS[i];
     const pe = document.getElementById('price-'  + h.ticker);
     const ce = document.getElementById('change-' + h.ticker);
     const we = document.getElementById('worth-'  + h.ticker);
@@ -284,19 +367,18 @@ async function fetchAll() {
       const { price, prev, currency } = res.value;
       const worth = price * h.shares;
       const pct   = ((price - prev) / prev) * 100;
-
       totalVal  += worth;
       totalPrev += prev * h.shares;
       loaded++;
 
-      pe.className = 'card-price'; pe.style = ''; pe.textContent = fmtC(price, currency);
-      ce.textContent = fmtPct(pct);
+      pe.className = 'card-price';        pe.style = ''; pe.textContent = fmtC(price, currency);
       ce.className = 'card-change ' + (pct > 0.005 ? 'up' : pct < -0.005 ? 'down' : 'flat');
-      we.className = 'card-worth'; we.style = ''; we.textContent = fmtC(worth, currency);
+      ce.style = ''; ce.textContent = fmtPct(pct);
+      we.className = 'card-worth';        we.style = ''; we.textContent = fmtC(worth, currency);
     } else {
-      pe.className = 'card-price'; pe.style = 'color:var(--down);font-size:11px;'; pe.textContent = 'unavailable';
-      ce.textContent = '—'; ce.className = 'card-change flat';
-      we.className = 'card-worth'; we.style = ''; we.textContent = '—';
+      pe.className = 'card-price'; pe.style = 'color:var(--down);font-size:12px;'; pe.textContent = 'N/A';
+      ce.className = 'card-change flat';  ce.style = ''; ce.textContent = '—';
+      we.className = 'card-worth';        we.style = 'color:var(--text2)'; we.textContent = '—';
       failed.push(h.ticker);
     }
   });
@@ -304,24 +386,23 @@ async function fetchAll() {
   if (loaded > 0) {
     const pct = ((totalVal - totalPrev) / totalPrev) * 100;
     const abs = totalVal - totalPrev;
-    document.getElementById('totalValue').textContent = '≈ ' + fmtC(totalVal, 'EUR');
+    document.getElementById('totalValue').textContent = fmtC(totalVal, 'EUR');
     document.getElementById('totalSub').textContent =
-      `${loaded}/${HOLDINGS.length} positions loaded` + (failed.length ? ` · failed: ${failed.join(', ')}` : '');
+      `${loaded} of ${HOLDINGS.length} positions` + (failed.length ? ` · failed: ${failed.join(', ')}` : ' · all OK');
     const tc = document.getElementById('totalChange');
-    tc.textContent = `${fmtPct(pct)}  (${abs >= 0 ? '+' : ''}${fmtC(abs, 'EUR')})`;
+    const ta = document.getElementById('totalChangeAbs');
+    tc.textContent = fmtPct(pct);
     tc.style.color = pct >= 0 ? 'var(--up)' : 'var(--down)';
+    ta.textContent = (abs >= 0 ? '+' : '') + fmtC(abs, 'EUR') + ' today';
+    ta.style.color = pct >= 0 ? 'var(--up)' : 'var(--down)';
   } else {
     document.getElementById('totalValue').textContent = '—';
-    document.getElementById('totalSub').textContent = 'Could not load any prices.';
-    document.getElementById('note').textContent =
-      '⚠ All price fetches failed. This file must be served over HTTPS or via a local server ' +
-      '(not opened as a plain file:// URL) for the CORS proxies to work. ' +
-      'Try uploading it to a hosting service, or open it with VS Code Live Server.';
+    document.getElementById('totalSub').textContent = 'Could not load prices.';
   }
 
   const now = new Date();
   document.getElementById('lastUpdate').textContent =
-    `Last updated: ${now.toLocaleTimeString('nl-NL')} — auto-refreshes every 60s`;
+    `Updated ${now.toLocaleTimeString('nl-NL')} · refreshes every 60s`;
 }
 
 buildCards();
