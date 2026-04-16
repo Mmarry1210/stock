@@ -65,15 +65,18 @@
   .total-change { font-family: 'JetBrains Mono',monospace; font-size: 20px; font-weight: 600; line-height: 1; }
   .total-change-label { font-size: 12px; color: var(--text2); margin-top: 5px; }
 
+  /* ── Column header (desktop only) ── */
   .col-header { display: grid; grid-template-columns: 1.8fr 1.1fr 0.9fr 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 6px; }
   .col-header span { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; }
   .col-header span:nth-child(2), .col-header span:nth-child(3), .col-header span:nth-child(4) { text-align: center; }
   .col-header span:nth-child(5) { text-align: right; }
 
+  /* ── Cards ── */
   .grid { display: grid; gap: 8px; }
   .card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px 20px; display: grid; grid-template-columns: 1.8fr 1.1fr 0.9fr 1fr 1fr;
+    padding: 16px 20px; display: grid;
+    grid-template-columns: 1.8fr 1.1fr 0.9fr 1fr 1fr;
     align-items: center; gap: 12px;
     transition: border-color .15s, background .15s; animation: fadeIn .35s ease both;
   }
@@ -107,6 +110,9 @@
   .card-pl.down { color: var(--down); }
   .card-pl-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
+  /* ── Mobile stat pill (shown only on mobile) ── */
+  .card-stats { display: none; }
+
   .skeleton {
     background: linear-gradient(90deg,#1e1e2e 25%,#252535 50%,#1e1e2e 75%);
     background-size: 200% 100%; border-radius: 4px; display: inline-block;
@@ -116,13 +122,60 @@
 
   .note { font-size: 12px; color: var(--text2); margin-top: 24px; line-height: 1.7; border-top: 1px solid var(--border); padding-top: 18px; }
 
-  @media(max-width:580px) {
-    .card { grid-template-columns: 1.5fr 1fr 1fr; }
+  /* ── Mobile layout ── */
+  @media(max-width:600px) {
+    body { padding: 20px 12px 48px; }
+
+    .header-left h1 { font-size: 20px; }
+    .total-card { padding: 18px 16px; }
+    .total-value { font-size: 28px; }
+    .total-change { font-size: 17px; }
+
+    /* Hide desktop column headers entirely */
+    .col-header { display: none; }
+
+    /* Cards become a 2-row layout: top row = ticker+name, bottom row = stats */
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 16px;
+    }
+
+    /* Hide all desktop grid children */
+    .card-price-block,
+    .card-change,
+    .card-worth-block,
     .card-pl-block { display: none; }
-    .card-price-block { display: none; }
-    .col-header { grid-template-columns: 1.5fr 1fr 1fr; }
-    .col-header span:nth-child(2) { display: none; }
-    .total-value { font-size: 30px; }
+
+    /* Top row inside card */
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    /* Bottom stats row */
+    .card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 4px;
+      width: 100%;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .stat-item { display: flex; flex-direction: column; align-items: flex-start; }
+    .stat-item:last-child { align-items: flex-end; }
+    .stat-item:nth-child(2), .stat-item:nth-child(3) { align-items: center; }
+
+    .stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; font-weight: 600; }
+    .stat-value { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 600; color: var(--text); }
+    .stat-value.up   { color: var(--up); }
+    .stat-value.down { color: var(--down); }
+    .stat-value.skeleton { width: 50px; height: 14px; display: inline-block; }
   }
 </style>
 </head>
@@ -282,10 +335,12 @@ function buildCards() {
     el.className = 'card';
     el.style.animationDelay = (i * 50) + 'ms';
     el.innerHTML = `
-      <div>
-        <div class="card-ticker">${h.ticker}</div>
-        <div class="card-name">${h.name}</div>
-        <div class="card-shares-label">${h.shares} shares</div>
+      <div class="card-top">
+        <div>
+          <div class="card-ticker">${h.ticker}</div>
+          <div class="card-name">${h.name}</div>
+          <div class="card-shares-label">${h.shares} shares</div>
+        </div>
       </div>
       <div class="card-price-block">
         <div class="card-price skeleton" id="price-${h.ticker}" style="width:76px;height:17px;">&nbsp;</div>
@@ -299,6 +354,24 @@ function buildCards() {
       <div class="card-pl-block">
         <div class="card-pl skeleton" id="pl-${h.ticker}" style="width:72px;height:17px;">&nbsp;</div>
         <div class="card-pl-label">vs buy</div>
+      </div>
+      <div class="card-stats">
+        <div class="stat-item">
+          <div class="stat-label">Price</div>
+          <div class="stat-value skeleton" id="m-price-${h.ticker}" style="width:50px;height:14px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Today</div>
+          <div class="stat-value skeleton" id="m-change-${h.ticker}" style="width:50px;height:14px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Value</div>
+          <div class="stat-value skeleton" id="m-worth-${h.ticker}" style="width:50px;height:14px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">P&amp;L</div>
+          <div class="stat-value skeleton" id="m-pl-${h.ticker}" style="width:50px;height:14px;">&nbsp;</div>
+        </div>
       </div>`;
     grid.appendChild(el);
   });
@@ -324,33 +397,47 @@ async function fetchAll() {
     const ce  = document.getElementById('change-' + h.ticker);
     const we  = document.getElementById('worth-'  + h.ticker);
     const ple = document.getElementById('pl-'     + h.ticker);
+    const mpe  = document.getElementById('m-price-'  + h.ticker);
+    const mce  = document.getElementById('m-change-' + h.ticker);
+    const mwe  = document.getElementById('m-worth-'  + h.ticker);
+    const mple = document.getElementById('m-pl-'     + h.ticker);
 
     if (res.status === 'fulfilled') {
       const { price, prev, currency } = res.value;
       const worth     = price * h.shares;
       const prevWorth = prev  * h.shares;
-      const pct = ((price - prev) / prev) * 100;
+      const pct    = ((price - prev) / prev) * 100;
+      const plPct  = ((price - h.buyPrice) / h.buyPrice) * 100;
 
-      // P&L vs buy price
-      const plPct = ((price - h.buyPrice) / h.buyPrice) * 100;
-
-      // Convert to EUR for total
       const toEur = currency === 'USD' ? eurPerUsd : 1;
       totalEur     += worth     * toEur;
       totalPrevEur += prevWorth * toEur;
       loaded++;
 
+      const todayCls = pct > 0.005 ? 'up' : pct < -0.005 ? 'down' : 'flat';
+      const plCls    = plPct >= 0 ? 'up' : 'down';
+
+      // Desktop
       pe.className = 'card-price'; pe.style = ''; pe.textContent = fmtC(price, currency);
-      ce.className = 'card-change ' + (pct > 0.005 ? 'up' : pct < -0.005 ? 'down' : 'flat');
-      ce.style = ''; ce.textContent = fmtPct(pct);
+      ce.className = `card-change ${todayCls}`; ce.style = ''; ce.textContent = fmtPct(pct);
       we.className = 'card-worth'; we.style = ''; we.textContent = fmtC(worth, currency);
-      ple.className = 'card-pl ' + (plPct >= 0 ? 'up' : 'down');
-      ple.style = ''; ple.textContent = fmtPct(plPct);
+      ple.className = `card-pl ${plCls}`; ple.style = ''; ple.textContent = fmtPct(plPct);
+
+      // Mobile
+      mpe.className = 'stat-value'; mpe.style = ''; mpe.textContent = fmtC(price, currency);
+      mce.className = `stat-value ${todayCls}`; mce.style = ''; mce.textContent = fmtPct(pct);
+      mwe.className = 'stat-value'; mwe.style = ''; mwe.textContent = fmtC(worth, currency);
+      mple.className = `stat-value ${plCls}`; mple.style = ''; mple.textContent = fmtPct(plPct);
+
     } else {
       pe.className = 'card-price'; pe.style = 'color:var(--down);font-size:12px;'; pe.textContent = 'N/A';
       ce.className = 'card-change flat'; ce.style = ''; ce.textContent = '—';
       we.className = 'card-worth'; we.style = 'color:var(--text2)'; we.textContent = '—';
       ple.className = 'card-pl'; ple.style = 'color:var(--text2)'; ple.textContent = '—';
+      mpe.className = 'stat-value'; mpe.style = 'color:var(--down)'; mpe.textContent = 'N/A';
+      mce.className = 'stat-value'; mce.style = 'color:var(--text2)'; mce.textContent = '—';
+      mwe.className = 'stat-value'; mwe.style = 'color:var(--text2)'; mwe.textContent = '—';
+      mple.className = 'stat-value'; mple.style = 'color:var(--text2)'; mple.textContent = '—';
       failed.push(h.ticker);
     }
   });
